@@ -2,32 +2,36 @@
 @section('content')
     <div class="container">
         <div class="col-md-6">
-            <h4>Dados do Cartão</h4>
-            <hr>
-            <form class="cc-form">
-                <div class="clearfix">
-                    <div class="form-group form-group-cc-number">
-                        <label>Nº Cartão</label><span class="brand"></span>
-                        <input class="form-control" placeholder="xxxx xxxx xxxx xxxx" type="text" name="card_number" />
-                    </div>
-                    <div class="form-group form-group-cc-cvc">
-                        <label>Cód. Segurança</label>
-                        <input class="form-control" placeholder="xxxx" type="text" name="card_cvv" />
-                    </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Dados do Cartão</h2>
+                    <hr>
                 </div>
-                <div class="clearfix">
-                    <div class="form-group form-group-cc-name">
-                        <label>Nome no Cartão</label>
-                        <input class="form-control" type="text" name="name"/>
+            </div>
+            <form action="" method="POST">
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label>Número do Cartão <span class="brand"></span></label>
+                        <input type="text" class="form-control" name="card_number">
+                        <input type="hidden" name="card_brand">
                     </div>
-                    <div class="form-group form-group-cc-date">
-                        <label>Validade</label>
-                        <input class="form-control" placeholder="mm/yy" type="text" name="card_valid" />
+                </div>                
+                <div class="row">
+                    <div class="col-md-4 form-group">
+                        <label>Código Segurança</label>
+                        <input type="text" class="form-control" name="card_cvv">
                     </div>
-                    <div class="form-group installments">
+                    <div class="col-md-4 form-group">
+                        <label>Mês</label>
+                        <input type="text" class="form-control" name="card_month">
                     </div>
+                    <div class="col-md-4 form-group">
+                        <label>Ano</label>
+                        <input type="text" class="form-control" name="card_year">
+                    </div>
+                    <div class="col-md-12 installments form-group"></div>
                 </div>
-                <button class="btn btn-success btn-lg">EFETUAR</button>
+                <button class="btn btn-success btn-lg processCheckout">Comprar</button>
             </form>
         </div>
     </div>
@@ -50,7 +54,7 @@
                     {
                         let imgFlag = `<img src="https://stc.pagseguro.uol.com.br/public/img/payment-methods-flags/68x30/${res.brand.name}.png"></img>`
                         spanBrand.innerHTML = imgFlag
-
+                        document.querySelector('input[name=card_brand]').value = res.brand.name
                         getInstallments(40, res.brand.name)
                     },
                     error: function(err){
@@ -62,6 +66,27 @@
                 });
             }
         });
+
+        let submitButton = document.querySelector('button.processCheckout')
+        submitButton.addEventListener('click', function(event){
+            event.preventDefault();
+            PagSeguroDirectPayment.createCardToken({
+                cardNumber:     document.querySelector('input[name=card_number]').value,
+                brand:          document.querySelector('input[name=card_brand]').value,
+                cvv:            document.querySelector('input[name=card_cvv]').value,
+                cardMonth:      document.querySelector('input[name=card_month]').value,
+                cardYear:       document.querySelector('input[name=card_year]').value,
+                success: function(){
+                    console.log('Token Gerado!',res)
+                },
+                complete: function(){
+                    console.log('Complete', res)
+                },
+                error: function(){
+                    console.log(err)
+                }
+            })
+        })
 
         function getInstallments(amount, brand){
             PagSeguroDirectPayment.getInstallments({
@@ -76,7 +101,6 @@
                     console.log(err)
                 },
                 complete: function(res){
-
                 },
             })
         }
