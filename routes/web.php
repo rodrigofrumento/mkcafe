@@ -23,17 +23,16 @@ Route::prefix('cart')->name('cart.')->group(function(){
 
 Route::prefix('checkout')->name('checkout.')->group(function(){
     Route::get('/', 'CheckoutController@index')->name('index');
+    Route::post('process', 'CheckoutController@process')->name('process');
 });
 
 Route::group(['middleware' => ['auth']], function(){
     Route::prefix('admin')->name('admin.')->namespace('Admin')->group(function()
 {
-    
     Route::resource('stores', 'StoreController');
     Route::resource('products', 'ProductController');
     Route::resource('categories', 'CategoryController');
     Route::post('photos/remove', 'ProductPhotoController@removePhoto')->name('photo.remove');
-
 });
 
 });
