@@ -1,4 +1,7 @@
 @extends('layouts.front')
+@section('stylesheets')
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+@endsection
 @section('content')
     <div class="container">
         <div class="col-md-6">
@@ -46,7 +49,9 @@
 @endsection
 @section('scripts')
     <script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
-    <script src="{{asset('assets/js/jquery.ajax.js')}}"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
 
     <script>
         const sessionId = '{{session()->get('pagseguro_session_code')}}';
@@ -116,7 +121,11 @@
                 url: '{{route("checkout.process")}}',
                 data: data,
                 dataType: 'json',
-                success: function(res){ console.log(res)},
+                success: function(res)
+                { 
+                    toastr.success(res.data.message, 'Sucesso!')
+                    window.location.href = '{{route('checkout.thanks')}}?order=' + res.data.order 
+                },
             })
         }
 
