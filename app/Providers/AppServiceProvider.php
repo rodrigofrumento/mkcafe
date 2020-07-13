@@ -25,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
     {
         \PagSeguro\Library::initialize();
         \PagSeguro\Library::cmsVersion()->setName("Feirao")->setRelease("1.0.0");
-        \PagSeguro\Library::moduleVersion()->setName("Feirao")->setRelease("1.0.0");  
+        \PagSeguro\Library::moduleVersion()->setName("Feirao")->setRelease("1.0.0"); 
     }
 }
