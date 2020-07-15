@@ -37,6 +37,7 @@
         <p>
             {{$store->description}}
         </p>
+        <a href="{{route('store.single', ['slug'=>$store->slug])}}" class="btn btn-sm btn-success">Ver loja</a>
     </div> 
     @endforeach
 </div>

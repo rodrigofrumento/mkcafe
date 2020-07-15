@@ -13,7 +13,13 @@ class CartController extends Controller
     }
     public function add(Request $request)
     {
-        $product = $request->get('product');
+        $productData = $request->get('product');
+        $product = \App\Product::whereSlug($productData['slug']);
+
+        if(!$product->count() | $productData['amount'] == 0) return redirect()->route('home');
+
+        $product = $product->first(['name', 'price'])->toArray();
+        $product = array_merge($productData, $product);
 
         if(session()->has('cart'))
         {
