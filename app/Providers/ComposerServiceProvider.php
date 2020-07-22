@@ -24,6 +24,6 @@ class ComposerServiceProvider extends ServiceProvider
     public function boot()
     {
         //$categories = \App\Category::all(['name', 'slug']);
-        view()->composer('*', 'App\Http\Views\CategoryViewComposer@compose');
+        view()->composer('layouts.front', 'App\Http\Views\CategoryViewComposer@compose');
     }
 }

@@ -9,7 +9,6 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->has('cart') ? session()->get('cart'):[];
-        dd($cart);
         return view('cart', compact('cart'));
     }
     public function add(Request $request)

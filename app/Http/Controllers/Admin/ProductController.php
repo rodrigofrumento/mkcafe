@@ -55,6 +55,7 @@ class ProductController extends Controller
         $product = $store->products()->create($data);
         $product->categories()->sync($data['categories']);
 
+
         if($request->hasFile('photos'))
         {
             $images = $this->imageUpload($request->file('photos'), 'image');

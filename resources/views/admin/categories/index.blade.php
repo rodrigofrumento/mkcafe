@@ -14,14 +14,14 @@
             <tr>
                 <td>{{$category->id}}</td>
                 <td>{{$category->name}}</td>
-                <td>
+                <td width="15%">
                     <div class="btn-group">
                         <a href="{{route('admin.categories.edit', ['category' => $category->id])}}" class="btn btn-sm btn-primary">Editar</a>
                         <form action="{{route('admin.categories.destroy', ['category' => $category->id])}}" method="POST">
-                        @csrf
-                        @method("DELETE")
-                        <button type="submit" class="btn btn-sm btn-danger">Remover</button>
-                    </form>
+                            @csrf
+                            @method("DELETE")
+                            <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                        </form>
                     </div>
                 </td>
             </tr>
