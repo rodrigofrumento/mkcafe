@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserRegisteredEmail;
 
 class RegisterController extends Controller
 {
@@ -30,7 +32,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/admin/stores';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -74,6 +76,9 @@ class RegisterController extends Controller
 
     protected function registered(Request $request, $user)
     {
+
+        Mail::to($user->email)->send(new UserRegisteredEmail($user));
+
         if(session()->has('cart'))
         {
             return redirect()->route('checkout.index');
