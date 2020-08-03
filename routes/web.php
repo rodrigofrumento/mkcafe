@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth']], function(){
     Route::prefix('admin')->name('admin.')->namespace('Admin')->group(function()
 {
     Route::get('notifications', 'NotificationController@notifications')->name('notification.index');
+    Route::get('notifications/read-all', 'NotificationController@readAll')->name('notifications.read.all');
     Route::resource('stores', 'StoreController');
     Route::resource('products', 'ProductController');
     Route::resource('categories', 'CategoryController');
@@ -54,4 +55,10 @@ Route::get('/model', function(){
 
     return $loja->products;
     return \App\User::all();
+});
+
+Route::get('not', function(){
+   //$user = \App\User::find(7);
+  //$user->notify(new \App\Notifications\StoreReceiveNewOrder());
+   //return $user->notifications;
 });
