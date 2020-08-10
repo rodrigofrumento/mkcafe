@@ -22,4 +22,12 @@ class NotificationController extends Controller
         flash('Notificações lidas com sucesso')->success();
         return redirect()->back();
     }
+
+    public function read($notification)
+    {
+       $notification = auth()->user()->notifications()->find($notification);
+       $notification->markAsRead();
+       flash('Notificação lida com sucesso')->success();
+        return redirect()->back();
+    }
 }

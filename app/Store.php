@@ -37,11 +37,11 @@ class Store extends Model
         return $this->belongsToMany(UserOrder::class, 'order_store', null, 'order_id');
     }
 
-    public function notifyStoreOwners(array $storeId = [])
+    public function notifyStoreOwners(array $storesId = [])
     {
         $stores = $this->whereIn('id', $storesId)->get();
         $stores->map(function($store){
             return $store->user;
-        })->each->notify(new StoreReceiveNewOrder);
+        })->each->notify(new StoreReceiveNewOrder());
     }
 }

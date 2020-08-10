@@ -1,26 +1,37 @@
 @extends('layouts.app')
 @section('content')
-    <a href="{{route('admin.notifications.read.all')}}" class="btn btn-lg btn-success">Marcar tudo como lido</a>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Notificação</th>
-                    <th>Criado em</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($unreadNotifications as $n)
-                <tr>
-                    <td>{{$n->data->message()}}</td>
-                    <td>{{$n->createdAt}}</td>
-                    <td>
-                        <div class="btn-group">
-                            <a href="#" class="btn btn-sm btn-primary">Marcar como Lida</a>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="row">
+        <div class="col-12">
+            <a href="{{route('admin.notifications.read.all')}}" class="btn btn-lg btn-success">Marcar tudo como lido</a>
+            <hr>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Notificação</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($unreadNotifications as $n)
+            <tr>
+                <td>{{$n->data['message']}}</td>
+                <td>{{$n->created_at->locale('pt')->diffForHumans()}}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{{route('admin.notifications.read', ['notification'=>$n->id])}}" class="btn btn-sm btn-primary">Marcar como Lida</a>
+                    </div>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="3">
+                    <div class="alert alert-warning">Nenhuma notificação encontrada!</div>
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 @endsection
