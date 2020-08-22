@@ -55,9 +55,9 @@
     <script>
         const sessionId = '{{session()->get('pagseguro_session_code')}}';
         const urlThanks = '{{route('checkout.thanks')}}';
-        const urlProcess = '{{route('checkout.process')}}';
+        const urlProcess = '{{route("checkout.process")}}';
         const amountTransaction = '{{$cartItems}}';
-        const crsf = '{{csrf_token()}}';
+        const csrf = '{{csrf_token()}}';
         PagSeguroDirectPayment.setSessionId(sessionId);
     </script>
     <script src="{{asset('js/pagseguro_functions.js')}}"></script>

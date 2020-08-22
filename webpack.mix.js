@@ -16,3 +16,5 @@ mix.js('resources/js/app.js', 'public/js')
 
 mix.copy('resources/js/pagseguro_functions.js', 'public/js')
    .copy('resources/js/pagseguro_events.js', 'public/js');
+
+mix.sourceMaps()
