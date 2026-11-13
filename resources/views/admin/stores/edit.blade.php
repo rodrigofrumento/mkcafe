@@ -4,24 +4,24 @@
 <form action="{{route('admin.stores.update', ['store'=>$store->id])}}" method="post" enctype="multipart/form-data">
     @csrf
     @method("PUT")
-    <div class="form-group">
+    <div class="mb-3">
     <div>
         <label>Nome Loja</label>
             <input type="text" name="name" class="form-control" value="{{$store->name}}">
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Descrição</label>
             <input type="text" name="description" class="form-control" value="{{$store->description}}">
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Telefone</label>
-            <input type="text" name="phone" id="phone" class="form-control" value="{{$store->phone}}">
+            <input type="text" name="phone" id="phone" data-mask="phone" class="form-control" value="{{$store->phone}}">
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Celular/Whatsapp</label>
-            <input type="text" name="mobile_phone" id="mobile_phone" class="form-control" value="{{$store->mobile_phone}}">
+            <input type="text" name="mobile_phone" id="mobile_phone" data-mask="mobile" class="form-control" value="{{$store->mobile_phone}}">
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <p>
             <img src="{{asset('storage/'.$store->logo)}}" alt="">
         </p>
@@ -39,11 +39,3 @@
     </form>
 @endsection
 
-@section('scripts')
-    <script>
-        let imPhone = new Inputmask("(99) 9999-9999");
-        imPhone.mask(document.getElementById("phone"));
-        let imMobilePhone = new Inputmask("(99) 9999-99999");
-        imMobilePhone.mask(document.getElementById("mobile_phone"));
-    </script>
-@endsection

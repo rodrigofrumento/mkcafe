@@ -5,7 +5,7 @@
         <div class="col-12">
             <h2>{{$store->name}}</h2>
             <p>{{$store->description}}</p>
-            <p><strong>Contatos: <span><i class="fa fa-phone"></i> {{$store->phone}} | <i class="fa fa-mobile"></i> {{$store->mobile_phone}}</span></strong></p>
+            <p><strong>Contatos: <span><i class="bi bi-telephone"></i> {{$store->phone}} | <i class="bi bi-phone"></i> {{$store->mobile_phone}}</span></strong></p>
             <hr>
         </div>
         @forelse ($store->products as $key => $product)

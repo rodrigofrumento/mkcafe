@@ -3,23 +3,19 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserHasStoreMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        if(auth()->user()->store()->count())
-        {
+        if ($request->user()->store()->exists()) {
             flash('Você já possui uma loja')->warning();
+
             return redirect()->route('admin.stores.index');
         }
+
         return $next($request);
     }
 }

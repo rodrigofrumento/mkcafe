@@ -2,116 +2,59 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
+use App\Models\Category;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
+/**
+ * Categorias são globais (compartilhadas entre as lojas) e qualquer
+ * dono de loja pode gerenciá-las, como no projeto original.
+ */
 class CategoryController extends Controller
 {
-	/**
-	 * @var Category
-	 */
-	private $category;
-
-	public function __construct(Category $category)
-	{
-		$this->category = $category;
-	}
-
-	/**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(): View
     {
-	    $categories = $this->category->paginate(10);
+        $categories = Category::orderBy('name')->paginate(10);
 
-	    return view('admin.categories.index', compact('categories'));
+        return view('admin.categories.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function create(): View
     {
-	    return view('admin.categories.create');
+        return view('admin.categories.create');
     }
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @param CategoryRequest $request
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-    public function store(CategoryRequest $request)
+    public function store(CategoryRequest $request): RedirectResponse
     {
-	    $data = $request->all();
+        Category::create($request->validated());
 
-	    $category = $this->category->create($data);
+        flash('Categoria Criada com Sucesso!')->success();
 
-	    flash('Categoria Criado com Sucesso!')->success();
-	    return redirect()->route('admin.categories.index');
+        return redirect()->route('admin.categories.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function edit(Category $category): View
     {
-        //
+        return view('admin.categories.edit', compact('category'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($category)
+    public function update(CategoryRequest $request, Category $category): RedirectResponse
     {
-	    $category = $this->category->findOrFail($category);
+        $category->update($request->validated());
 
-	    return view('admin.categories.edit', compact('category'));
+        flash('Categoria Atualizada com Sucesso!')->success();
+
+        return redirect()->route('admin.categories.index');
     }
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param CategoryRequest $request
-	 * @param  int $category
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-    public function update(CategoryRequest $request, $category)
+    public function destroy(Category $category): RedirectResponse
     {
-	    $data = $request->all();
+        $category->delete();
 
-	    $category = $this->category->find($category);
-	    $category->update($data);
+        flash('Categoria Removida com Sucesso!')->success();
 
-	    flash('Categoria Atualizada com Sucesso!')->success();
-	    return redirect()->route('admin.categories.index');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($category)
-    {
-	    $category = $this->category->find($category);
-	    $category->delete();
-
-	    flash('Categoria Removida com Sucesso!')->success();
-	    return redirect()->route('admin.categories.index');
+        return redirect()->route('admin.categories.index');
     }
 }

@@ -1,29 +1,25 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
-use App\Product;
+
+use App\Models\Product;
+use App\Models\Store;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    private $product;
-    public function __construct(Product $product)
+    public function index(): View
     {
-        $this->product = $product;
-    }
-    
-    public function index()
-    {
-        $products = $this->product->limit(6)->orderBy('id', 'DESC')->get();
-        $stores = \App\Store::limit(3)->orderBy('id', 'DESC')->get();
+        $products = Product::with('photos')->latest('id')->limit(6)->get();
+        $stores = Store::latest('id')->limit(3)->get();
 
         return view('welcome', compact('products', 'stores'));
     }
 
-    public function single($slug)
+    public function single(string $slug): View
     {
-        $product = $this->product->whereSlug($slug)->first();
+        $product = Product::with(['photos', 'store'])->where('slug', $slug)->firstOrFail();
+
         return view('single', compact('product'));
     }
-
 }

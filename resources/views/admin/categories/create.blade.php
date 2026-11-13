@@ -3,7 +3,7 @@
     <h1>Criar Categoria</h1>
     <form action="{{route('admin.categories.store')}}" method="post">
         <input type="hidden" name="_token" value="{{csrf_token()}}">
-        <div class="form-group">
+        <div class="mb-3">
             <label>Nome</label>
             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{old('name')}}">
             @error('name')
@@ -12,7 +12,7 @@
                 </div>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Descrição</label>
             <input type="text" name="description" class="form-control @error('description') is-invalid @enderror" value="{{old('description')}}">
             @error('description')

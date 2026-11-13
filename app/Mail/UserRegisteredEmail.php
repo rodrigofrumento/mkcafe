@@ -2,39 +2,30 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\User;
 
 class UserRegisteredEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private $user;
+    public function __construct(public User $user) {}
 
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct(User $user)
+    public function envelope(): Envelope
     {
-        $this->user = $user;
+        return new Envelope(
+            subject: 'Conta criada com sucesso',
+            replyTo: [new Address(config('mail.from.address'), config('mail.from.name'))],
+        );
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
-    public function build()
+    public function content(): Content
     {
-        return $this
-                ->subject('Conta criada com sucesso')
-                ->replyTo('contato@feirao.com.br')
-                ->view('emails.user-registered')
-                ->with(['user' => $this->user]);
+        return new Content(view: 'emails.user-registered');
     }
 }

@@ -1,30 +1,22 @@
 {
+    "$schema": "https://www.schemastore.org/package.json",
     "private": true,
+    "type": "module",
     "scripts": {
-        "dev": "npm run development",
-        "development": "mix",
-        "watch": "mix watch",
-        "watch-poll": "mix watch -- --watch-options-poll=1000",
-        "hot": "mix watch --hot",
-        "prod": "npm run production",
-        "production": "mix --production"
+        "build": "vite build",
+        "dev": "vite"
     },
     "devDependencies": {
-        "axios": "^0.35.0",
-        "bootstrap": "^4.0.0",
-        "cross-env": "^7.0",
-        "jquery": "^3.2",
-        "laravel-mix": "^6.0.49",
-        "lodash": "^4.17.13",
-        "popper.js": "^1.12",
-        "resolve-url-loader": "^5.0.0",
-        "sass": "^1.15.2",
-        "sass-loader": "^12.6.0"
+        "@popperjs/core": "^2.11.8",
+        "bootstrap": "^5.3.9",
+        "bootstrap-icons": "^1.13.2",
+        "concurrently": "^10.0.3",
+        "inputmask": "^5.0.10",
+        "laravel-vite-plugin": "^3.1",
+        "sass": "^1.108.2",
+        "vite": "^8.0.0"
     },
-    "dependencies": {
-        "inputmask": "^5.0.5"
-    },
-    "overrides": {
-        "webpack": "5.104.1"
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.1"
     }
 }

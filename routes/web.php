@@ -1,68 +1,41 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use App\Http\Controllers\Admin;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\StoreController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', 'HomeController@index')->name('home');
-Route::get('/product/{slug}', 'HomeController@single')->name('product.single');
-Route::get('/category/{slug}', 'CategoryController@index')->name('category.single');
-Route::get('/store/{slug}', 'StoreController@index')->name('store.single');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/product/{slug}', [HomeController::class, 'single'])->name('product.single');
+Route::get('/category/{slug}', [CategoryController::class, 'index'])->name('category.single');
+Route::get('/store/{slug}', [StoreController::class, 'index'])->name('store.single');
 
-Route::prefix('cart')->name('cart.')->group(function(){
-    Route::get('/', 'CartController@index')->name('index');
-    Route::post('add', 'CartController@add')->name('add');
-    Route::get('remove/{slug}', 'CartController@remove')->name('remove');
-    Route::get('cancel', 'CartController@cancel')->name('cancel');
+Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('add', 'add')->name('add');
+    Route::delete('remove/{slug}', 'remove')->name('remove');
+    Route::post('cancel', 'cancel')->name('cancel');
 });
 
-Route::prefix('checkout')->name('checkout.')->group(function(){
-    Route::get('/', 'CheckoutController@index')->name('index');
-    Route::post('process', 'CheckoutController@process')->name('process');
-    Route::get('thanks', 'CheckoutController@thanks')->name('thanks');
-    Route::post('/notification', 'CheckoutController@notification')->name('notification');
+Route::middleware('auth')->group(function () {
+    Route::get('my-orders', [OrderController::class, 'index'])->name('user.orders');
+    Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
 });
 
-Route::get('my-orders', 'UserOrderController@index')->name('user.orders')->middleware('auth');
+Route::middleware(['auth', 'store.owner'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read-all', [Admin\NotificationController::class, 'readAll'])->name('notifications.read.all');
+    Route::post('notifications/{notification}/read', [Admin\NotificationController::class, 'read'])->name('notifications.read');
 
-Route::group(['middleware' => ['auth', 'access.control.store.admin']], function(){
-
-    Route::prefix('admin')->name('admin.')->namespace('Admin')->group(function()
-{
-    Route::get('notifications', 'NotificationController@notifications')->name('notifications.index');
-    Route::get('notifications/read-all', 'NotificationController@readAll')->name('notifications.read.all');
-    Route::get('notifications/read/{notification}', 'NotificationController@read')->name('notifications.read');
-    Route::resource('stores', 'StoreController');
-    Route::resource('products', 'ProductController');
-    Route::resource('categories', 'CategoryController');
-    Route::post('photos/remove', 'ProductPhotoController@removePhoto')->name('photo.remove');
-    Route::get('orders/my', 'OrdersController@index')->name('orders.my');
+    Route::resource('stores', Admin\StoreController::class)->except('show');
+    Route::resource('products', Admin\ProductController::class)->except('show');
+    Route::resource('categories', Admin\CategoryController::class)->except('show');
+    Route::delete('photos/{photo}', [Admin\ProductPhotoController::class, 'destroy'])->name('photo.remove');
+    Route::get('orders/my', [Admin\OrdersController::class, 'index'])->name('orders.my');
 });
 
-});
-Auth::routes();
-
-//Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/model', function(){
-
-    $loja = \App\Store::find(1);
-
-    return $loja->products;
-    return \App\User::all();
-});
-
-Route::get('not', function(){
-   //$user = \App\User::find(7);
-   //$user->notify(new \App\Notifications\StoreReceiveNewOrder());
-   //return $user->notifications;
-   //return $user->readNotifications->count();
-
-});
+Auth::routes(['verify' => false, 'confirm' => false]);
