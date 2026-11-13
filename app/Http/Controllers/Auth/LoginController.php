@@ -3,53 +3,39 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class LoginController extends Controller
+class LoginController extends Controller implements HasMiddleware
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/';
+    protected string $redirectTo = '/';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('guest')->except('logout');
+        return [
+            new Middleware('guest', except: ['logout']),
+            new Middleware('auth', only: ['logout']),
+        ];
     }
 
-    protected function authenticated(Request $request, $user)
+    protected function authenticated(Request $request, User $user): RedirectResponse
     {
-        if($user->role == 'ROLE_OWNER')
-            return redirect()->route('admin.stores.index');
+        return redirect()->to(self::redirectFor($user));
+    }
 
-        if($user->role == 'ROLE_USER' && session()->has('cart'))
-        {
-            return redirect()->route('checkout.index');
-        } else {
-            return redirect()->route('home');
+    /** Para onde mandar o usuário logo após login ou cadastro. */
+    public static function redirectFor(User $user): string
+    {
+        if ($user->isOwner()) {
+            return route('admin.stores.index');
         }
-        return null;
+
+        return session()->has('cart') ? route('cart.index') : route('home');
     }
 }

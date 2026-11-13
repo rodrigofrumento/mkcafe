@@ -1,15 +1,20 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
-use App\Model;
-use Faker\Generator as Faker;
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(\App\Category::class, function (Faker $faker) {
-    return [
-        'name' => $faker->name,
-        'slug' => $faker->slug,
-        'description' => $faker->sentence,
-        
-    ];
-});
+/**
+ * @extends Factory<Category>
+ */
+class CategoryFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(),
+        ];
+    }
+}

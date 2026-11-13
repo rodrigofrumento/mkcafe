@@ -26,13 +26,11 @@
             <div class="product-add">
                 <form action="{{route('cart.add')}}" method="post">
                     @csrf
-                    <input type="hidden" name="product[name]" value="{{$product->name}}">
-                    <input type="hidden" name="product[price]" value="{{$product->price}}">
                     <input type="hidden" name="product[slug]" value="{{$product->slug}}">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <hr>
                         <label>Quantidade</label>
-                        <input type="number" name="product[amount]" class="form-control col-md-2" value="1">
+                        <input type="number" name="product[amount]" class="form-control w-auto" value="1" min="1" max="100">
                     </div>
                     <button class="btn btn-lg btn-danger">Comprar</button>
                 </form>

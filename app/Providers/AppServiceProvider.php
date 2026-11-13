@@ -2,29 +2,25 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
-        \PagSeguro\Library::initialize();
-        \PagSeguro\Library::cmsVersion()->setName("Feirao")->setRelease("1.0.0");
-        \PagSeguro\Library::moduleVersion()->setName("Feirao")->setRelease("1.0.0"); 
+        Paginator::useBootstrapFive();
+
+        // Menu de categorias do layout da loja.
+        View::composer('layouts.front', function ($view) {
+            $view->with('categories', Category::orderBy('name')->get(['name', 'slug']));
+        });
     }
 }

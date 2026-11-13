@@ -3,138 +3,104 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use \App\Product;
-use \App\Http\Requests\ProductRequest;
-use App\Traits\UploadTrait;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    use UploadTrait;
-    private $product;
-    public function __construct(Product $product)
+    public function index(Request $request): View|RedirectResponse
     {
-        $this->product = $product;
-    }
+        $store = $request->user()->store;
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $user = auth()->user();
-        if(!$user->store()->exists()){
+        if (! $store) {
             flash('É preciso criar loja para criar produtos')->warning();
+
             return redirect()->route('admin.stores.index');
-        } 
-        $products = $user->store->products()->paginate(10);
+        }
+
+        $products = $store->products()->latest('id')->paginate(10);
+
         return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function create(Request $request): View|RedirectResponse
     {
-        $categories = \App\Category::all(['id', 'name']);
+        if (! $request->user()->store) {
+            flash('É preciso criar loja para criar produtos')->warning();
+
+            return redirect()->route('admin.stores.index');
+        }
+
+        $categories = Category::orderBy('name')->get(['id', 'name']);
+
         return view('admin.products.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(ProductRequest $request)
+    public function store(ProductRequest $request): RedirectResponse
     {
+        $store = $request->user()->store;
+        abort_unless($store, 403);
 
-        $data = $request->all();
-        $categories = $request->get('categories', null);
-        $data['price'] = formatPriceToDatabase($data['price']);
-        $store = auth()->user()->store;
-        $product = $store->products()->create($data);
-        $product->categories()->sync($data['categories']);
+        $product = $store->products()->create($request->safe()->except(['categories', 'photos']));
+        $product->categories()->sync($request->validated('categories', []));
+        $this->savePhotos($request, $product);
 
-
-        if($request->hasFile('photos'))
-        {
-            $images = $this->imageUpload($request->file('photos'), 'image');
-            $product->photos()->createmany($images);
-        }
-        
         flash('Produto Criado com Sucesso!')->success();
+
         return redirect()->route('admin.products.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function edit(Request $request, int $product): View
     {
-        //
+        $product = $this->ownProduct($request, $product);
+        $categories = Category::orderBy('name')->get(['id', 'name']);
+
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($product)
+    public function update(ProductRequest $request, int $product): RedirectResponse
     {
-        $product = $this->product->findOrFail($product);
-        $categories = \App\Category::all(['id', 'name']);
-        return view('admin.products.edit', compact(['product', 'categories']));
-    }
+        $product = $this->ownProduct($request, $product);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(ProductRequest $request, $product)
-    {
-        $data = $request->all();
-        $categories = $request->get('categories', null);
-        $product = $this->product->find($product);
-        $product->update($data);
-        
-        if(!is_null($categories))
-        {
-            $product->categories()->sync($categories);
-        }
-        
-        if($request->hasFile('photos'))
-        {
-            $images = $this->imageUpload($request->file('photos'), 'image');
-            $product->photos()->createmany($images);
-        }
-        
+        $product->update($request->safe()->except(['categories', 'photos']));
+        $product->categories()->sync($request->validated('categories', []));
+        $this->savePhotos($request, $product);
+
         flash('Produto Atualizado com Sucesso!')->success();
+
         return redirect()->route('admin.products.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($product)
-    {   
-        $product = $this->product->find($product);
+    public function destroy(Request $request, int $product): RedirectResponse
+    {
+        $product = $this->ownProduct($request, $product);
+
+        Storage::disk('public')->delete($product->photos->pluck('image')->all());
         $product->delete();
+
         flash('Produto Removido com Sucesso!')->success();
+
         return redirect()->route('admin.products.index');
+    }
+
+    /** Só produtos da loja do próprio usuário; qualquer outro ID responde 404. */
+    private function ownProduct(Request $request, int $id): Product
+    {
+        $store = $request->user()->store;
+        abort_unless($store, 404);
+
+        return $store->products()->findOrFail($id);
+    }
+
+    private function savePhotos(ProductRequest $request, Product $product): void
+    {
+        foreach ($request->file('photos', []) as $photo) {
+            $product->photos()->create(['image' => $photo->store('products', 'public')]);
+        }
     }
 }

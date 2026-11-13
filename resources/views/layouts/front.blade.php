@@ -1,62 +1,62 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Feirão da Fotografia</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{{asset('css/app.css')}}">
-    <style>
-        .front.row {
-            margin-bottom: 40px;
-        }
-    </style>
-    @yield('stylesheests')
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @yield('stylesheets')
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom: 40px;">
-    <a class="navbar-brand" href="{{route('home')}}">Feirão da Fotografia</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item @if(request()->is('/')) active @endif">
-                <a class="nav-link" href="{{route('home')}}">Home <span class="sr-only">(current)</span></a>
-            </li>
-            @foreach ($categories as $category)
-                <li class="nav-item @if(request()->is('category/'. $category->slug)) active @endif">
-                <a class="nav-link" href="{{route('category.single', ['slug' => $category->slug])}}">{{$category->name}}</a>
+<nav class="navbar navbar-expand-lg bg-body-tertiary mb-5">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ route('home') }}">Feirão da Fotografia</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFront"
+                aria-controls="navbarFront" aria-expanded="false" aria-label="Abrir menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarFront">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link @if(request()->is('/')) active @endif" href="{{ route('home') }}">Home</a>
                 </li>
-            @endforeach
-        </ul>
-        <div class="my-2 my-lg-0">
-            <ul class="navbar-nav mr-auto">
+                @foreach ($categories as $category)
+                    <li class="nav-item">
+                        <a class="nav-link @if(request()->is('category/'.$category->slug)) active @endif"
+                           href="{{ route('category.single', ['slug' => $category->slug]) }}">{{ $category->name }}</a>
+                    </li>
+                @endforeach
+            </ul>
+            <ul class="navbar-nav">
                 @auth
+                    <li class="nav-item">
+                        <span class="nav-link">{{ auth()->user()->name }}</span>
+                    </li>
+                    @if (auth()->user()->isOwner())
+                        <li class="nav-item">
+                            <a href="{{ route('admin.stores.index') }}" class="nav-link">Painel</a>
+                        </li>
+                    @endif
+                    <li class="nav-item">
+                        <a href="{{ route('user.orders') }}" class="nav-link @if(request()->is('my-orders')) active @endif">Meus Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="nav-link">Sair</button>
+                        </form>
+                    </li>
+                @else
+                    <li class="nav-item"><a href="{{ route('login') }}" class="nav-link">Entrar</a></li>
+                    <li class="nav-item"><a href="{{ route('register') }}" class="nav-link">Cadastrar</a></li>
+                @endauth
                 <li class="nav-item">
-                    <span class="nav-link">{{auth()->user()->name}}</span>
-                </li>
-                <li class="nav-item @if(request()->is('my-orders')) active @endif">
-                    <a href="{{route('user.orders')}}" class="nav-link">Meus Pedidos</a>
-                </li>
-            
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="event.preventDefault();
-                                                          document.querySelector('form.logout').submit(); ">Sair</a>
-                    <form action="{{route('logout')}}" class="logout" method="POST" style="display:none;">
-                        @csrf
-                    </form>
-                </li>
-            @endauth
-                
-                <li class="nav-item">
-                    <a href="{{route('cart.index')}}" class="nav-link">
-                        @if(session()->has('cart'))
-                            <span class="badge badge-danger">{{count(session()->get('cart'))}}</span>
+                    <a href="{{ route('cart.index') }}" class="nav-link" aria-label="Carrinho">
+                        @if (session()->has('cart'))
+                            <span class="badge text-bg-danger">{{ count(session('cart')) }}</span>
                         @endif
-                        <i class="fa fa-shopping-cart"></i>
+                        <i class="bi bi-cart"></i>
                     </a>
                 </li>
             </ul>
@@ -67,7 +67,6 @@
     @include('flash::message')
     @yield('content')
 </div>
-    <script src="{{asset('js/app.js')}}"></script>
-    @yield('scripts')
+@yield('scripts')
 </body>
 </html>

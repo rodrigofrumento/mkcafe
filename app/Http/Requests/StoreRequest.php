@@ -6,39 +6,30 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name'          => 'required',
-            'description'   => 'required|min:10',
-            'phone'         => 'required',
-            'mobile_phone'  => 'required',
-            'logo'          => 'image'
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'min:10', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'mobile_phone' => ['required', 'string', 'max:20'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
-        return 
-        [
+        return [
             'min' => 'Campo deve ter no mínimo :min caracteres',
             'required' => 'O campo :attribute é obrigatório',
-            'image' => 'O Arquivo não é uma imagem válida'
+            'image' => 'O arquivo não é uma imagem válida',
+            'mimes' => 'Envie uma imagem JPG, PNG ou WEBP',
+            'logo.max' => 'A imagem deve ter no máximo 2 MB',
         ];
     }
 }

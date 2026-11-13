@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Store;
+use App\Models\Store;
+use Illuminate\View\View;
 
 class StoreController extends Controller
 {
-    private $store;
-
-    public function __construct(Store $store)
+    public function index(string $slug): View
     {
-        $this->store = $store;
-    }
+        $store = Store::with('products.photos')->where('slug', $slug)->firstOrFail();
 
-    public function index($slug)
-    {
-        $store = $this->store->whereSlug($slug)->first();
         return view('store', compact('store'));
     }
 }

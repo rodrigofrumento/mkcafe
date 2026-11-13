@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Category;
+use App\Models\Category;
+use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function __construct(Category $category)
+    public function index(string $slug): View
     {
-        $this->category = $category;
-    }
+        $category = Category::with('products.photos')->where('slug', $slug)->firstOrFail();
 
-    public function index($slug)
-    {
-        $category = $this->category->whereSlug($slug)->first();
         return view('category', compact('category'));
     }
 }

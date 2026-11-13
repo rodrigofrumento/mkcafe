@@ -1,4 +1,5 @@
 @extends('layouts.front')
+
 @section('content')
 <div class="row">
     <div class="col-12">
@@ -6,42 +7,39 @@
         <hr>
     </div>
     <div class="col-12">
-        <div class="accordion" id="accordionExample">
-           @forelse ($userOrders as $key => $order)
-            <div class="card">
-              <div class="card-header" id="headingOne">
-                <h2 class="mb-0">
-                  <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{$key}}" aria-expanded="true" aria-controls="collapseOne">
-                    Pedido nº: {{$order->reference}}
-                  </button>
-                </h2>
-              </div>
-              <div id="collapse{{$key}}" class="collapse @if($key == 0) show @endif" aria-labelledby="headingOne" data-parent="#accordionExample">
-                <div class="card-body">
-                  <ul>
-                    @php $items = unserialize($order->items); @endphp
-                    @foreach($items as $item)
-                        <li>{{$item['name']}} | R$ {{number_format($item['price'], 2, ',', '.')}}
-                        <br>
-                        Quantidade Pedida: {{$item['amount']}}
-                        <br>
-                        Total: R$ {{number_format($item['price'] * $item['amount'], 2, ',', '.')}}
-                        </li>
-
-                    @endforeach
-                  </ul>
+        <div class="accordion" id="ordersAccordion">
+            @forelse ($userOrders as $key => $order)
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button @if($key !== 0) collapsed @endif" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#order{{ $order->id }}"
+                                aria-expanded="{{ $key === 0 ? 'true' : 'false' }}" aria-controls="order{{ $order->id }}">
+                            Pedido nº {{ $order->reference }}
+                            <span class="badge text-bg-secondary ms-2">{{ $order->status === 'pending' ? 'Pendente' : $order->status }}</span>
+                        </button>
+                    </h2>
+                    <div id="order{{ $order->id }}" class="accordion-collapse collapse @if($key === 0) show @endif" data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body">
+                            <ul>
+                                @foreach ($order->items as $item)
+                                    <li>
+                                        {{ $item['name'] }} | R$ {{ number_format($item['price'], 2, ',', '.') }}<br>
+                                        Quantidade: {{ $item['amount'] }}<br>
+                                        Total: R$ {{ number_format($item['price'] * $item['amount'], 2, ',', '.') }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <strong>Total do pedido: R$ {{ number_format($order->total(), 2, ',', '.') }}</strong>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
             @empty
-                <div class="alert alert-warning">Nenhum pedido recebido</div>
+                <div class="alert alert-warning">Nenhum pedido realizado</div>
             @endforelse
-          </div>
-          <div class="col-12">
-              <hr>
-              {{$userOrders->links()}}
-          </div>
         </div>
+        <div class="mt-3">
+            {{ $userOrders->links() }}
+        </div>
+    </div>
 </div>
-    
 @endsection

@@ -3,80 +3,92 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreRequest;
-use App\Traits\UploadTrait;
+use App\Models\Store;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
-class StoreController extends Controller
+class StoreController extends Controller implements HasMiddleware
 {
-    use UploadTrait;
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('user.has.store')->only(['create', 'store']);
+        return [new Middleware('user.has.store', only: ['create', 'store'])];
     }
-    
-    public function index()
+
+    public function index(Request $request): View
     {
-        $store = auth()->user()->store;
+        $store = $request->user()->store;
+
         return view('admin.stores.index', compact('store'));
     }
 
-    public function create()
+    public function create(): View
     {
-        
-        $users = \App\User::all(['id', 'name']);
-        return view('admin.stores.create', compact('users'));
+        return view('admin.stores.create');
     }
-    
-    public function store(StoreRequest $request)
-    {
-        $data = $request->all();
-        $user = auth()->user();
 
-        if($request->hasFile('logo'))
-        {
-            $data['logo'] = $this->imageUpload($request->file('logo'));
+    public function store(StoreRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('logo', 'public');
         }
-        $store = $user->store()->create($data);
+
+        $request->user()->store()->create($data);
 
         flash('Loja Criada com Sucesso!')->success();
+
         return redirect()->route('admin.stores.index');
     }
 
-    public function edit($store)
+    public function edit(Request $request, int $store): View
     {
-        $store = \App\Store::find($store);
+        $store = $this->ownStore($request, $store);
 
         return view('admin.stores.edit', compact('store'));
     }
 
-    public function update(StoreRequest $request, $store)
+    public function update(StoreRequest $request, int $store): RedirectResponse
     {
-        $data = $request->all();
-        $store = \App\Store::find($store);
+        $store = $this->ownStore($request, $store);
+        $data = $request->validated();
 
-        if($request->hasFile('logo'))
-        {
-            if(Storage::disk('public')->exists($store->logo))
-            {
+        if ($request->hasFile('logo')) {
+            if ($store->logo) {
                 Storage::disk('public')->delete($store->logo);
             }
-            $data['logo'] = $this->imageUpload($request->file('logo'));
+            $data['logo'] = $request->file('logo')->store('logo', 'public');
         }
-        
+
         $store->update($data);
+
         flash('Loja Atualizada com Sucesso!')->success();
+
         return redirect()->route('admin.stores.index');
     }
 
-    public function destroy($store)
+    public function destroy(Request $request, int $store): RedirectResponse
     {
-        $store = \App\Store::find($store);
+        $store = $this->ownStore($request, $store);
+
+        if ($store->logo) {
+            Storage::disk('public')->delete($store->logo);
+        }
         $store->delete();
 
         flash('Loja Removida com Sucesso!')->success();
+
         return redirect()->route('admin.stores.index');
     }
 
+    /** Só a loja do próprio usuário; qualquer outro ID responde 404. */
+    private function ownStore(Request $request, int $id): Store
+    {
+        return Store::where('user_id', $request->user()->id)->findOrFail($id);
+    }
 }
